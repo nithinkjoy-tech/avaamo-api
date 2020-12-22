@@ -5,6 +5,7 @@ const findUser = require("../utils/findUser");
 const {Scrapeddata} = require("../models/scrapeddata");
 const validateSession = require("../middleware/validateSession");
 const uploadFile=require("../utils/uploadFiles")
+const createFolder=require("../utils/createFolder")
 
 router.get("/", [auth, validateSession], async (req, res) => {
   const user = await findUser(req.user["username"]);
@@ -22,8 +23,8 @@ router.post("/", [auth, validateSession], async(req, res) => {
   }
 
   const user = await findUser(req.user["username"]);
-  
-  const error=uploadFile(req,res,user.username)
+  const folder= await createFolder(user.username)
+  const error=uploadFile(req,res,folder)
   if(error) res.status(500).send("Error occured at our end. Try again!")
   function wait(milliseconds) {
     return new Promise(resolve => setTimeout(resolve, milliseconds));
