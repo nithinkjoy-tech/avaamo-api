@@ -19,6 +19,7 @@ router.post("/", async (req, res) => {
   user.resettoken = encryptedResetToken;
   await user.save();
   mailService(user["email"], resetToken);
+  console.log(resetToken)
   res.send("Link Sent Successfully");
 });
 

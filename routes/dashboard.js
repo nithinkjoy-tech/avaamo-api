@@ -9,17 +9,21 @@ const uploadFile=require("../utils/uploadFiles")
 router.get("/", [auth, validateSession], async (req, res) => {
   const user = await findUser(req.user["username"]);
   const scrapeddata = await Scrapeddata.findById(user.scrapeddata);
-
-  res.send("done"); //scrapeddata["data"].length);
+  console.log(user)
+  res.send(user); //scrapeddata["data"].length);
 });
 
 router.post("/", [auth, validateSession], async(req, res) => {
+
   if(req.body.link){
     console.log('this is a link',req.body.link)
+
     return res.send("link")
   }
 
-  const error=uploadFile(req,res)
+  const user = await findUser(req.user["username"]);
+  
+  const error=uploadFile(req,res,user.username)
   if(error) res.status(500).send("Error occured at our end. Try again!")
   function wait(milliseconds) {
     return new Promise(resolve => setTimeout(resolve, milliseconds));
