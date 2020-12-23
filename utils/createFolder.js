@@ -1,6 +1,6 @@
 const makeDir = require("make-dir");
 
 module.exports = async function(foldername)  {
-  await makeDir(`public/${foldername}`);
-  return foldername
+  const path=await makeDir(`public/${foldername}`);
+  return {foldername,path}
 };

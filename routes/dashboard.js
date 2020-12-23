@@ -4,34 +4,49 @@ const auth = require("../middleware/auth");
 const findUser = require("../utils/findUser");
 const {Scrapeddata} = require("../models/scrapeddata");
 const validateSession = require("../middleware/validateSession");
-const uploadFile=require("../utils/uploadFiles")
-const createFolder=require("../utils/createFolder")
+const uploadFile = require("../utils/uploadFiles");
+const createFolder = require("../utils/createFolder");
+const {spawn} = require("child_process");
 
 router.get("/", [auth, validateSession], async (req, res) => {
   const user = await findUser(req.user["username"]);
   const scrapeddata = await Scrapeddata.findById(user.scrapeddata);
-  console.log(user)
+  console.log(user);
   res.send(user); //scrapeddata["data"].length);
 });
 
-router.post("/", [auth, validateSession], async(req, res) => {
+router.post("/", [auth, validateSession], async (req, res) => {
+  let url = "";
+  let path = "";
+  let uploadres=""
 
-  if(req.body.link){
-    console.log('this is a link',req.body.link)
+  function disp(data){
+    console.log(data)
+  }
 
-    return res.send("link")
+  function scrape(url,path) {
+    const process = spawn("python", ["./python/scrape.py", `${url}`,`${path}`]);
+    process.stdout.on("data", data => {
+      disp(data.toString())
+    });
+  }
+
+  if (req.body.link) {
+    console.log("this is a link", req.body.link);
+    url=req.body.link
+    scrape(url,path)
+    return res.send("link");
   }
 
   const user = await findUser(req.user["username"]);
-  const folder= await createFolder(user.username)
-  const error=uploadFile(req,res,folder)
-  if(error) res.status(500).send("Error occured at our end. Try again!")
-  function wait(milliseconds) {
-    return new Promise(resolve => setTimeout(resolve, milliseconds));
-  }
-
-  const ans=await wait(3000)
-  res.send(ans); 
+  const result = await createFolder(user.username);
+  uploadFile(req, res,result.foldername,function(data){
+    uploadres=data
+    if (uploadres["err"]) return res.status(500).send("Error occured at our end. Try again!");
+    path=result.path+`\\`+uploadres.name
+    scrape(url,path)
+    res.send("done");
+  });
 });
 
 router.post("/:id", [auth, validateSession], (req, res) => {
