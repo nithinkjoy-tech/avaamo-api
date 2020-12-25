@@ -7,46 +7,62 @@ const validateSession = require("../middleware/validateSession");
 const uploadFile = require("../utils/uploadFiles");
 const createFolder = require("../utils/createFolder");
 const {spawn} = require("child_process");
+const deleteFolder=require("../utils/deleteFolder");
 
 router.get("/", [auth, validateSession], async (req, res) => {
   const user = await findUser(req.user["username"]);
   const scrapeddata = await Scrapeddata.findById(user.scrapeddata);
-  console.log(user);
-  res.send(user); //scrapeddata["data"].length);
+  console.log(scrapeddata);
+  res.send(scrapeddata["data"].length.toString());
 });
 
 router.post("/", [auth, validateSession], async (req, res) => {
+  const user = await findUser(req.user["username"]);
   let url = "";
   let path = "";
-  let uploadres=""
+  let uploadres = "";
+  let result=""
 
-  function disp(data){
-    console.log(data)
+  async function saveToDatabase(data) {
+    let dat=data.replace(/\\n/g,"")
+    data=JSON.parse(JSON.stringify(dat))
+    const scrapeddata = await Scrapeddata.findById(user.scrapeddata);
+    scrapeddata.data.push(data);
+    await scrapeddata.save();
+
+    if(!url){
+      deleteFolder(result.path,function(error){
+        console.log(error)
+      })
+    }
+
+    res.send(scrapeddata["data"].length.toString());
   }
 
-  function scrape(url,path) {
-    const process = spawn("python", ["./python/scrape.py", `${url}`,`${path}`]);
+  function scrape(url, path) {
+    const process = spawn("python", [
+      "./python/scrape.py",
+      `${url}`,
+      `${path}`,
+    ]);
     process.stdout.on("data", data => {
-      disp(data.toString())
+      saveToDatabase(data.toString());
     });
   }
 
   if (req.body.link) {
-    console.log("this is a link", req.body.link);
-    url=req.body.link
-    scrape(url,path)
-    return res.send("link");
+    url = req.body.link;
+    scrape(url, path);
+  } else {
+    result = await createFolder(user.username);
+    uploadFile(req, res, result.foldername, function (data) {
+      uploadres = data;
+      if (uploadres["err"])
+        return res.status(500).send("Error occured at our end. Try again!");
+      path = result.path + `\\` + uploadres.name;
+      scrape(url, path);
+    });
   }
-
-  const user = await findUser(req.user["username"]);
-  const result = await createFolder(user.username);
-  uploadFile(req, res,result.foldername,function(data){
-    uploadres=data
-    if (uploadres["err"]) return res.status(500).send("Error occured at our end. Try again!");
-    path=result.path+`\\`+uploadres.name
-    scrape(url,path)
-    res.send("done");
-  });
 });
 
 router.post("/:id", [auth, validateSession], (req, res) => {
@@ -55,6 +71,8 @@ router.post("/:id", [auth, validateSession], (req, res) => {
     return res
       .status(400)
       .send({property: "question", msg: "Question should not be empty"});
+
+  
   res.send(question + "this is the answer");
 });
 

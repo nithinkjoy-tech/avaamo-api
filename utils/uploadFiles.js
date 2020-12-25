@@ -1,6 +1,6 @@
 const multer = require("multer");
 
-module.exports=function(req,res,folder,fn){
+module.exports=function(req,res,folder,returnFileName){
   let name=""
     let storage = multer.diskStorage({
         destination: function (req, file, cb) {
@@ -15,14 +15,13 @@ module.exports=function(req,res,folder,fn){
     var upload = multer({ storage: storage }).single('file')
     
     upload(req, res, function (err) {
-      err="gerg"
       if (err instanceof multer.MulterError) {
-        return fn({err,name})
+        return returnFileName({err,name})
       } else if (err) { 
-        return fn({err,name})
+        return returnFileName({err,name})
       }
       err=""
       name=req.file.filename
-      fn({err,name})
+      returnFileName({err,name})
     })
 }
