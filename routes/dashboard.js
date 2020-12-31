@@ -26,6 +26,8 @@ router.get("/:id", [auth, validateSession], async (req, res) => {
 
 router.post("/", [auth, validateSession], async (req, res) => {
   const user = await findUser(req.user["username"]);
+  let {id}=req.body
+  console.log(id,"id")
   let url = "";
   let path = "";
   let uploadres = "";
@@ -54,9 +56,11 @@ router.post("/", [auth, validateSession], async (req, res) => {
     finalData["Scraped On"] = date;
     finalData["user"] = user.username;
     finalData["data"] = data;
-    if(req.body.id){
-      console.log("replace")
-    }
+    if(id){
+      await Scrapeddata.updateOne({_id:user.scrapeddata},{ $set: {[`data.${id-1}`]:finalData }})
+      delete finalData["data"];
+      return res.send(finalData)
+    }   
 
     scrapeddata.data.push(finalData);
     await scrapeddata.save();
