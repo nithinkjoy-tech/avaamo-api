@@ -1,10 +1,13 @@
-import requests
-from bs4 import BeautifulSoup
-import sys
-from pathlib import Path
-
-
 try:
+    import requests
+    from bs4 import BeautifulSoup
+    import sys
+    from pathlib import Path
+    import spacy
+    from itertools import chain
+    from nltk.corpus import wordnet
+
+    finalResult=[]
     path = Path(r"{}".format(sys.argv[2]))
     url = sys.argv[1]
     contents = ""
@@ -33,6 +36,8 @@ try:
     th = tr[0].find_all("th")
 
     data = {}
+    abc={}
+    test=[]
     result = []
     thdata = []
     tr.pop(0)
@@ -45,7 +50,24 @@ try:
             data[key] = value.get_text()
         result.append(data)
         data = {}
-    print(result)
+    
+
+    finalResult.append(result)
+
+    json=result[0]
+    arr=[]
+    token=list(json.keys())
+    for a in token:
+        synonyms = wordnet.synsets(a)
+        lemmas = list(set(chain.from_iterable([word.lemma_names() for word in synonyms])))
+        arr.append(lemmas)
+    for i in range(len(token)):
+        data[token[i]]=arr[i]
+        test.append(data)
+        data={}
+    finalResult.append(test)
+    print(finalResult)
+
 
 
     sys.stdout.flush()

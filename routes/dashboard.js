@@ -17,7 +17,6 @@ router.get("/", [auth, validateSession], async (req, res) => {
 });
 
 router.get("/:id", [auth, validateSession], async (req, res) => {
-  console.log("here", req.params.id);
   const user = await findUser(req.user["username"]);
   const scrapeddata = await Scrapeddata.findById(user.scrapeddata);
   delete scrapeddata["data"][req.params.id - 1]["data"];
@@ -27,40 +26,39 @@ router.get("/:id", [auth, validateSession], async (req, res) => {
 router.post("/", [auth, validateSession], async (req, res) => {
   const user = await findUser(req.user["username"]);
   let {id}=req.body
-  console.log(id,"id")
   let url = "";
   let path = "";
-  let uploadres = "";
-  let result = "";
-  let date = moment().format("MM/DD/YYYY");
+  let uploadedFileDetails = "";
+  let createdFolderDetails = "";
+  let scrapedDate = moment().format("MM/DD/YYYY");
   let finalData = {};
 
   function deleteFolder() {
     if (!url)
-      removeDirectory(result.path, function (error) {
+      removeDirectory(createdFolderDetails.path, function (error) {
         console.log(error);
       });
   }
 
-  async function saveToDatabase(data) {
-    let dat = data.replace(/\\n/g, "");
-    data = JSON.parse(JSON.stringify(dat));
+  async function saveToDatabase(data,headerSynonyms) {
+    let formattedData = JSON.parse(JSON.stringify(data.replace(/\\n/g, "")));
+    formattedData=formattedData.replace(/\uFFFD/g, "-")
     const scrapeddata = await Scrapeddata.findById(user.scrapeddata);
 
     if (url) finalData["URL Link"] = url;
     else
-      finalData["filename"] = uploadres["name"].substring(
+      finalData["filename"] = uploadedFileDetails["name"].substring(
         14,
-        uploadres["name"].length
+        uploadedFileDetails["name"].length
       );
-    finalData["Scraped On"] = date;
+    finalData["Scraped On"] = scrapedDate;
     finalData["user"] = user.username;
-    finalData["data"] = data;
+    finalData["data"] = [formattedData,{headerSynonyms}];
     if(id){
       await Scrapeddata.updateOne({_id:user.scrapeddata},{ $set: {[`data.${id-1}`]:finalData }})
       delete finalData["data"];
       return res.send(finalData)
-    }   
+    }
 
     scrapeddata.data.push(finalData);
     await scrapeddata.save();
@@ -78,12 +76,15 @@ router.post("/", [auth, validateSession], async (req, res) => {
     ]);
 
     process.stdout.on("data", data => {
-      data = data.toString();
+      let output=data.toString().toLowerCase()
+      data=eval(output)[0]
+      console.log(data)
+      headerSynonyms=eval(output)[1]
       if (data.indexOf("null") === 0) {
         deleteFolder();
         return res.status(400).send(data.substring(5, data.length));
       }
-      saveToDatabase(data);
+      saveToDatabase(JSON.stringify(data),JSON.stringify(headerSynonyms));
     });
   }
 
@@ -91,20 +92,34 @@ router.post("/", [auth, validateSession], async (req, res) => {
     url = req.body.link;
     scrape(url, path);
   } else {
-    result = await createFolder(user.username);
-    uploadFile(req, res, result.foldername, function (data) {
-      uploadres = data;
-      if (uploadres["err"])
+    createdFolderDetails = await createFolder(user.username);
+    uploadFile(req, res, createdFolderDetails.foldername, function (data) {
+      uploadedFileDetails = data;
+      if (uploadedFileDetails["err"])
         return res.status(500).send("Error occured at our end. Try again!");
-      path = result.path + `\\` + uploadres.name;
+      path = createdFolderDetails.path + `\\` + uploadedFileDetails.name;
       scrape(url, path);
     });
   }
 });
 
-router.post("/:id", [auth, validateSession], (req, res) => {
-  console.log("a", req.params.id);
+router.post("/:id", [auth, validateSession], async(req, res) => {
   const {question} = req.body;
+  const user = await findUser(req.user["username"]);
+  const scrapeddata = await Scrapeddata.findById(user.scrapeddata);
+  let headerSynonyms=scrapeddata["data"][req.params.id-1]["data"][1].headerSynonyms
+  let data=eval(JSON.stringify(scrapeddata["data"][req.params.id-1]["data"][0]))
+  const process = spawn("python", [
+    "./python/query.py",
+    `${question}`,
+    `${headerSynonyms}`,
+    `${data}`,
+  ]);
+
+  process.stdout.on("data", data => {
+    console.log(data.toString())
+  });  
+
   if (!question)
     return res
       .status(400)
