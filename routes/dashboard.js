@@ -25,7 +25,7 @@ router.get("/:id", [auth, validateSession], async (req, res) => {
 
 router.post("/", [auth, validateSession], async (req, res) => {
   const user = await findUser(req.user["username"]);
-  let {id}=req.body
+  let {id} = req.body;
   let url = "";
   let path = "";
   let uploadedFileDetails = "";
@@ -40,9 +40,9 @@ router.post("/", [auth, validateSession], async (req, res) => {
       });
   }
 
-  async function saveToDatabase(data,headerSynonyms) {
+  async function saveToDatabase(data, headerSynonyms) {
     let formattedData = JSON.parse(JSON.stringify(data.replace(/\\n/g, "")));
-    formattedData=formattedData.replace(/\uFFFD/g, "-")
+    formattedData = formattedData.replace(/\uFFFD/g, "-");
     const scrapeddata = await Scrapeddata.findById(user.scrapeddata);
 
     if (url) finalData["URL Link"] = url;
@@ -53,11 +53,14 @@ router.post("/", [auth, validateSession], async (req, res) => {
       );
     finalData["Scraped On"] = scrapedDate;
     finalData["user"] = user.username;
-    finalData["data"] = [formattedData,{headerSynonyms}];
-    if(id){
-      await Scrapeddata.updateOne({_id:user.scrapeddata},{ $set: {[`data.${id-1}`]:finalData }})
+    finalData["data"] = [formattedData, {headerSynonyms}];
+    if (id) {
+      await Scrapeddata.updateOne(
+        {_id: user.scrapeddata},
+        {$set: {[`data.${id - 1}`]: finalData}}
+      );
       delete finalData["data"];
-      return res.send(finalData)
+      return res.send(finalData);
     }
 
     scrapeddata.data.push(finalData);
@@ -76,15 +79,15 @@ router.post("/", [auth, validateSession], async (req, res) => {
     ]);
 
     process.stdout.on("data", data => {
-      let output=data.toString().toLowerCase()
-      data=eval(output)[0]
-      console.log(data)
-      headerSynonyms=eval(output)[1]
+      let output = data.toString().toLowerCase();
+      data = eval(output)[0];
+      console.log(data);
+      headerSynonyms = eval(output)[1];
       if (data.indexOf("null") === 0) {
         deleteFolder();
         return res.status(400).send(data.substring(5, data.length));
       }
-      saveToDatabase(JSON.stringify(data),JSON.stringify(headerSynonyms));
+      saveToDatabase(JSON.stringify(data), JSON.stringify(headerSynonyms));
     });
   }
 
@@ -103,12 +106,15 @@ router.post("/", [auth, validateSession], async (req, res) => {
   }
 });
 
-router.post("/:id", [auth, validateSession], async(req, res) => {
+router.post("/:id", [auth, validateSession], async (req, res) => {
   const {question} = req.body;
   const user = await findUser(req.user["username"]);
   const scrapeddata = await Scrapeddata.findById(user.scrapeddata);
-  let headerSynonyms=scrapeddata["data"][req.params.id-1]["data"][1].headerSynonyms
-  let data=eval(JSON.stringify(scrapeddata["data"][req.params.id-1]["data"][0]))
+  let headerSynonyms =
+    scrapeddata["data"][req.params.id - 1]["data"][1].headerSynonyms;
+  let data = eval(
+    JSON.stringify(scrapeddata["data"][req.params.id - 1]["data"][0])
+  );
   const process = spawn("python", [
     "./python/query.py",
     `${question}`,
@@ -117,15 +123,14 @@ router.post("/:id", [auth, validateSession], async(req, res) => {
   ]);
 
   process.stdout.on("data", data => {
-    console.log(data.toString())
-  });  
+    console.log(data.toString());
+    return res.send(data.toString());
+  });
 
   if (!question)
     return res
       .status(400)
       .send({property: "question", msg: "Question should not be empty"});
-
-  res.send(question + "this is the answer");
 });
 
 module.exports = router;
