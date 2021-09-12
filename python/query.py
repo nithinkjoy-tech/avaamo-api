@@ -54,7 +54,7 @@ try:
         send=[]
         for item in data:
             send.append(list(item.values())[0])    
-        print("select a format",send)
+        print("Include your prefered header in your query:- ",",".join(send))
         
     z=[]
     strng=""

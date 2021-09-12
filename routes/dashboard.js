@@ -26,6 +26,7 @@ router.get("/:id", [auth, validateSession], async (req, res) => {
 router.post("/", [auth, validateSession], async (req, res) => {
   const user = await findUser(req.user["username"]);
   let {id} = req.body;
+  console.log(id,"i")
   let url = "";
   let path = "";
   let uploadedFileDetails = "";
@@ -75,13 +76,13 @@ router.post("/", [auth, validateSession], async (req, res) => {
     const process = spawn("python", [
       "./python/scrape.py",
       `${url}`,
-      `${path}`,
+      `${path}`,  
     ]);
 
     process.stdout.on("data", data => {
       let output = data.toString().toLowerCase();
       data = eval(output)[0];
-      console.log(data);
+      console.log(data);  
       headerSynonyms = eval(output)[1];
       if (data.indexOf("null") === 0) {
         deleteFolder();

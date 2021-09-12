@@ -1,15 +1,8 @@
-# ele=[1,2,3,4,4,5,3,5,5,5]
-# # print(ele.index(max(ele)))
-# max_value = max(ele)
-# indices = [index for index, value in enumerate(ele) if value == max_value]
-# print(indices)
-index1=None
-if index1==None:
-        # for i in store:
-        #     print(i)
-        #     val = data[index1].get(i)
-        #     if val and not val in store:
-        #       ans[i] = val
-    print("fine")
-else:
-    print("select a format")
+from spacy.lang.en import English
+
+nlp = English()
+sentencizer = nlp.create_pipe("sentencizer")
+nlp.add_pipe(sentencizer)
+doc = nlp("This is a sentence. This is another sentence.")
+print(doc)
+assert len(list(doc.sents)) == 2

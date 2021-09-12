@@ -1,7 +1,7 @@
 const crypto = require("crypto");
 const key = process.env.ENCRYPTION_PASSWORD
 const iv = crypto.randomBytes(16);
-
+ 
 function encrypt(resetToken) {
  let cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(key), iv);
  let encrypted = cipher.update(resetToken);

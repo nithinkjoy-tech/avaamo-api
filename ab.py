@@ -35,36 +35,28 @@ try:
         thead=table[0].find("thead")
         
     if(thead):
-        theadtr=thead.find("tr")
-        if(theadtr):
-            thead=theadtr.find_all(["th","td"])
+            theadtr=thead.find("tr")
+            if(theadtr):
+                thead=theadtr.find_all(["th","td"])
+            else:
+                thead=thead.find_all(["th","td"])
         else:
-            thead=thead.find_all(["th","td"])
-    else:
-        thead=table[0].find("tr").find_all(["th","td"]) 
+            thead=table[0].find("tr").find_all(["th","td"]) 
                 
                 
-    tbody = table[0].find("tbody")
-    if(tbody):
-        tbody=tbody.find_all("tr")
-    else:
-        tbody=table[0].find_all("tr")
-        tbody.pop(0)        
-                   
-        # print(thead,"thed")
-        # print(tbody,"tbod")
-        # print(tbody,"tb")
-        # thead=table[0].find("thead").find("tr").find_all(["th","td"])
-        
+        tbody = table[0].find("tbody")
+        if(tbody):
+            tbody=tbody.find_all("tr")
+        else:
+            tbody=table[0].find_all("tr")
+            tbody.pop(0)        
     
-    # tr = tbody.find_all("tr")
     tr=tbody
     if(thead):
         th=thead
     else:
         th=tr[0].find_all("th")
         
-    # th = tr[0].find_all("th")
     data = {}
     abc={}
     test=[]
@@ -79,7 +71,6 @@ try:
     for index,val in enumerate(tr):
         if(len(val.find_all(["td"]))<len(th)-1):
             tr.pop(index)
-        # print(val.find_all(["td"]))
 
     for i in range(len(tr)):
         th = tr[i].find_all(["th", "td"])
@@ -103,7 +94,7 @@ try:
         test.append(data)
         data={}
     finalResult.append(test)
-    print(finalResult)
+    print(finalResult,"rs")
 
 
 
