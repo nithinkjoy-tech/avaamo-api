@@ -10,15 +10,6 @@ module.exports = function (userEmail,resetToken) {
     html: `<strong>This is your reset token ${resetToken}</strong>`,
   };
 
-  // sgMail
-  // .send(msg)
-  // .then(() => {
-  //   console.log('Email sent')
-  // })
-  // .catch((error) => {
-  //   console.error(error)
-  // })
-
   (async () => {
     try {
       await sgMail.send(msg);

@@ -12,6 +12,7 @@ const moment = require("moment");
 
 router.get("/", [auth, validateSession], async (req, res) => {
   const user = await findUser(req.user["username"]);
+  if(!user) return res.status(404).send({property:"No user found"})
   const scrapeddata = await Scrapeddata.findById(user.scrapeddata);
   res.send(scrapeddata["data"].length.toString());
 });
@@ -44,6 +45,7 @@ router.post("/", [auth, validateSession], async (req, res) => {
   async function saveToDatabase(data, headerSynonyms) {
     let formattedData = JSON.parse(JSON.stringify(data.replace(/\\n/g, "")));
     formattedData = formattedData.replace(/\uFFFD/g, "-");
+    formattedData = formattedData.replace(/ /g, "-");
     const scrapeddata = await Scrapeddata.findById(user.scrapeddata);
 
     if (url) finalData["URL Link"] = url;

@@ -29,8 +29,8 @@ try:
             raise Exception('There is no table available in the uploaded file')
     
     if url:
-        tbody = table[7].find("tbody")
-        thead=table[7].find("thead")
+        tbody = table[0].find("tbody")
+        thead=table[0].find("thead")
     else:
         thead=table[0].find("thead")
         
@@ -51,20 +51,12 @@ try:
         tbody=table[0].find_all("tr")
         tbody.pop(0)        
                    
-        # print(thead,"thed")
-        # print(tbody,"tbod")
-        # print(tbody,"tb")
-        # thead=table[0].find("thead").find("tr").find_all(["th","td"])
-        
-    
-    # tr = tbody.find_all("tr")
     tr=tbody
     if(thead):
         th=thead
     else:
         th=tr[0].find_all("th")
         
-    # th = tr[0].find_all("th")
     data = {}
     abc={}
     test=[]
@@ -79,7 +71,6 @@ try:
     for index,val in enumerate(tr):
         if(len(val.find_all(["td"]))<len(th)-1):
             tr.pop(index)
-        # print(val.find_all(["td"]))
 
     for i in range(len(tr)):
         th = tr[i].find_all(["th", "td"])
@@ -104,8 +95,6 @@ try:
         data={}
     finalResult.append(test)
     print(finalResult)
-
-
 
     sys.stdout.flush()
 except Exception as error:

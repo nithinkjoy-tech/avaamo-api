@@ -8,6 +8,39 @@ try:
     headerSynonyms = eval(sys.argv[2])
     data = eval(sys.argv[3])
     ele = [0]*len(data)
+    
+    for aa in range(0,len(doc),2):
+        if(aa+1<len(doc)):
+            doc.append(str(doc[aa])+"-"+str(doc[aa+1])) 
+           
+    for aa in range(0,len(doc),3):
+        if(aa+2<len(doc)):
+            doc.append(str(doc[aa])+"-"+str(doc[aa+1])+"-"+str(doc[aa+2]))  
+          
+    for aa in range(0,len(doc),4):
+        if(aa+3<len(doc)):
+            doc.append(str(doc[aa])+"-"+str(doc[aa+1])+"-"+str(doc[aa+2])+"-"+str(doc[aa+3]))    
+        
+    for aa in range(0,len(doc),5):
+        if(aa+4<len(doc)):
+            doc.append(str(doc[aa])+"-"+str(doc[aa+1])+"-"+str(doc[aa+2])+"-"+str(doc[aa+3])+"-"+str(doc[aa+4]))    
+        
+    for aa in range(1,len(doc),2):
+        if(aa+1<len(doc)):
+            doc.append(str(doc[aa])+"-"+str(doc[aa+1])) 
+           
+    for aa in range(1,len(doc),3):
+        if(aa+2<len(doc)):
+            doc.append(str(doc[aa])+"-"+str(doc[aa+1])+"-"+str(doc[aa+2]))  
+          
+    for aa in range(1,len(doc),4):
+        if(aa+3<len(doc)):
+            doc.append(str(doc[aa])+"-"+str(doc[aa+1])+"-"+str(doc[aa+2])+"-"+str(doc[aa+3]))    
+        
+    for aa in range(1,len(doc),5):
+        if(aa+4<len(doc)):
+            doc.append(str(doc[aa])+"-"+str(doc[aa+1])+"-"+str(doc[aa+2])+"-"+str(doc[aa+3])+"-"+str(doc[aa+4]))
+    
     for word in doc:
         for item in headerSynonyms:
             key = list(item.keys())[0]
@@ -29,6 +62,7 @@ try:
                 store.append(item)
 
     store = list(set(store))
+    # print(store,"str")
     for i, a in enumerate(data):
         for key, value in a.items():
             if(key in store):
