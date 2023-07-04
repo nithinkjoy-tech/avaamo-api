@@ -5,6 +5,8 @@ try:
     from pathlib import Path
     import spacy
     from itertools import chain
+    import nltk
+    nltk.download('wordnet')
     from nltk.corpus import wordnet
 
     finalResult=[]

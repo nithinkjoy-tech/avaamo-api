@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 module.exports = function () {
   mongoose
-    .connect("mongodb://localhost/avaamo", {
+    .connect("mongodb://127.0.0.1/avaamo", {
       useUnifiedTopology: true,
       useNewUrlParser: true,
     })

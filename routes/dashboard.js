@@ -83,6 +83,7 @@ router.post("/", [auth, validateSession], async (req, res) => {
 
     process.stdout.on("data", data => {
       let output = data.toString().toLowerCase();
+      console.log(output,"op")
       data = eval(output)[0];
       console.log(data);  
       headerSynonyms = eval(output)[1];
