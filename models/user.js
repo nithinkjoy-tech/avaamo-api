@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema({
   },
   passwordexpirytime: {
     type: Date,
-    default: Date.now() + 60//4800000
+    default: Date.now() + 604800000,
   },
   scrapeddata: {
     type: mongoose.Schema.Types.ObjectId,
@@ -93,13 +93,11 @@ function validateUser(data) {
 }
 
 function validatePassword(data) {
-  const schema = Joi.object(
-    {
-      oldpassword: Joi.string(),
-      password: passwordValidation[0],
-      confirmpassword: passwordValidation[1]
-    }
-  );
+  const schema = Joi.object({
+    oldpassword: Joi.string(),
+    password: passwordValidation[0],
+    confirmpassword: passwordValidation[1],
+  });
 
   return schema.validate(data);
 }
